@@ -8,6 +8,7 @@
 script = ExtResource("1_65q1h")
 inEditor = true
 debugLine = true
+lmbActionName = &"LMB"
 
 [node name="EditorFeatures" type="Node2D" parent="."]
 script = ExtResource("2_82w66")

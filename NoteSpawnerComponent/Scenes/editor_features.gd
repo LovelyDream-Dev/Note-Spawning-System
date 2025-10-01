@@ -22,11 +22,26 @@ var parent:NoteSpawner
 var mousePos:Vector2
 var closestCirclePositionToMouse:Vector2
 var currentMouseBeatOnCircle:float
+var distanceFromCircleToMouse:float
+var currentCirclePositionFromBeat:Vector2
+var notePlacementSide:float
 
 func _ready() -> void:
 	parent = get_parent()
 
+func _input(_event: InputEvent) -> void:
+	if Input.is_action_just_pressed(parent.lmbActionName):
+		var s = Sprite2D.new()
+		s.texture = load("res://icon.svg")
+		s.position = currentCirclePositionFromBeat
+		self.add_child(s)
+
 func _process(_delta: float) -> void:
+	if !parent.inEditor:
+		self.hide()
+		return
+	if !self.visible: self.show()
+	notePlacementSide = parent.notePlacementSide
 	editorSnapDivisor = parent.editorSnapDivisor
 	notePlacementDirection = parent.notePlacementDirection
 	mousePos = get_global_mouse_position()
@@ -35,8 +50,12 @@ func _process(_delta: float) -> void:
 	minMouseDistance = parent.minMouseDistance
 	get_closest_circle_position_to_mouse(parent.position)
 	get_beat_from_circle_position(parent.position)
+	if distanceFromCircleToMouse <= minMouseDistance:
+		get_circle_position_from_beat(parent.position, currentMouseBeatOnCircle)
 
 func _draw() -> void:
+	if !parent.inEditor:
+		return
 	draw_circle(parent.position, radiusInPixels, circleColor, false, 4.0, true)
 	if parent.debugLine:
 		if mousePos and closestCirclePositionToMouse:
@@ -45,9 +64,10 @@ func _draw() -> void:
 func get_closest_circle_position_to_mouse(center:Vector2):
 	var vector = mousePos - center
 	closestCirclePositionToMouse = center + vector.normalized() * radiusInPixels
+	distanceFromCircleToMouse = mousePos.distance_to(closestCirclePositionToMouse)
 
 func get_beat_from_circle_position(center:Vector2):
-	var angle = atan2(closestCirclePositionToMouse.y - center.y, closestCirclePositionToMouse.x - center.x)
+	var angle = atan2(closestCirclePositionToMouse.y - center.y, closestCirclePositionToMouse.x - center.x) + notePlacementSide # PI flips the spawn side
 	var normalizedAngle = fposmod(notePlacementDirection * angle, TAU)
 	var value = normalizedAngle / TAU * 4
 	value = snappedf(value,1.0/float(editorSnapDivisor))
@@ -55,3 +75,11 @@ func get_beat_from_circle_position(center:Vector2):
 	if value >= 4:
 		value = 0.0
 	currentMouseBeatOnCircle = value
+	print(currentMouseBeatOnCircle)
+
+func get_circle_position_from_beat(center:Vector2, beat:float):
+	var angle = ((beat * TAU / 4) / notePlacementDirection) + notePlacementSide
+	var posx = center.x + radiusInPixels * cos(angle)
+	var posy = center.y + radiusInPixels * sin(angle)
+	currentCirclePositionFromBeat = Vector2(posx, posy)
+	

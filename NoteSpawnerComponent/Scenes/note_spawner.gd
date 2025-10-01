@@ -5,9 +5,10 @@ class_name NoteSpawner
 @export var circleColor:Color = Color("f44c4f")
 
 @export var inEditor:bool = false
+	
 @export var debugLine:bool = false
 
-@export var minMouseDistance:float = 35.0
+@export var minMouseDistance:float = 50.0
 
 @export var radiusInPixels:float = 500.0
 
@@ -17,10 +18,14 @@ class_name NoteSpawner
 @export_range(-1.0,1.0,2.0) var spawnDirection:float = 1.0
 ## The direction that notes are placed in. Used for when spin direction is changed while mapping. [br][br][code]-1[/code]: Beats along the circumference ascend counter-clockwise. [br][br][code]1[/code]: Beats along the circumference ascent clockwise.
 @export_range(-1.0,1.0,2.0) var notePlacementDirection:float = 1.0
+## The side that editor beats begin on. [br][br][code]0[/code]: The notes start on the right. [br][br][code]PI[/code]: The notes start on the left.
+@export_range(0,PI,PI) var notePlacementSide:float = PI
+
+@export var lmbActionName:StringName 
 
 @onready var editorFeatures:EditorFeatures = $EditorFeatures
 
-var editorSnapDivisor:int = 16
+var editorSnapDivisor:int = 2
 # TEMPORARY VALUE: The bpm of my test song
 var bpm:float = 163.0 
 var secondsPerBeat:float
@@ -43,14 +48,6 @@ func _process(_delta: float) -> void:
 		spawn_notes()
 
 # --- CUSTOM FUNCTIONS ---
-
-func disable_editor_features():
-	inEditor = false
-	editorFeatures.process_mode = Node.PROCESS_MODE_DISABLED
-
-func enable_editor_features():
-	inEditor = true
-	editorFeatures.process_mode = Node.PROCESS_MODE_ALWAYS
 
 func spawn_notes():
 	for dict in testHitTimes:
