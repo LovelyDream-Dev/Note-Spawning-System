@@ -75,7 +75,6 @@ func get_beat_from_circle_position(center:Vector2):
 	if value >= 4:
 		value = 0.0
 	currentMouseBeatOnCircle = value
-	print(currentMouseBeatOnCircle)
 
 func get_circle_position_from_beat(center:Vector2, beat:float):
 	var angle = ((beat * TAU / 4) / notePlacementDirection) + notePlacementSide

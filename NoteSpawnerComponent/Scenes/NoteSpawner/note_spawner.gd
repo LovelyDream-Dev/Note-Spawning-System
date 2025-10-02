@@ -30,7 +30,15 @@ var editorSnapDivisor:int = 2
 var bpm:float = 163.0 
 var secondsPerBeat:float
 var mainSongPosition:float
-var testHitTimes:Array = [{"start":1.0, "end":1.0, "side":1.0, "direction":1.0}]
+
+var testHitTimes:Array = [
+	{"start":1.48, "end":1.0, "side":-1.0},
+	{"start":1.85, "end":1.0, "side":-1.0},
+	{"start":2.22, "end":1.0, "side":-1.0},
+	{"start":2.59, "end":1.0, "side":-1.0},
+	{"start":2.96, "end":1.0, "side":-1.0}
+	]
+
 var currentlySpawnedNotes:Array = []
 # The amount of time in seconds a note spawns before its hit time
 var spawnWindowInSeconds:float = 1.0
@@ -54,27 +62,32 @@ func spawn_notes():
 		var start:float = parse_hit_times(dict).start
 		var end:float = parse_hit_times(dict).end
 		var side:int = parse_hit_times(dict).side
-		var direction:int = parse_hit_times(dict).direction
 		if abs(mainSongPosition - start) < spawnWindowInSeconds and start not in currentlySpawnedNotes:
 			var beatPosition = start/secondsPerBeat
 			var angle = fmod(beatPosition, beatsPerRotation) * (TAU/beatsPerRotation)
 			var spawnPosition = get_position_along_radius(Vector2(0,0), spawnSide * radiusInPixels * 2, spawnDirection * angle)
 			var hitPosition = get_position_along_radius(Vector2(0,0), spawnSide * radiusInPixels, spawnDirection * angle)
-			var testNoteSprite:Sprite2D = Sprite2D.new()
-			testNoteSprite.texture = load("res://icon.svg") 
-			testNoteSprite.position = spawnPosition
+
+			var hitObject:HitObject = HitObject.new()
+			hitObject.hitNoteTexture = load("res://Default Images/Hit-Note.png")
+			hitObject.position = spawnPosition
+			hitObject.center = self.position
+			hitObject.start = start
+			hitObject.end = hitObject.end
+			hitObject.side = side
+			
+
 			var tw = create_tween().set_ease(Tween.EASE_OUT_IN).set_trans(Tween.TRANS_LINEAR).parallel()
-			tw.tween_property(testNoteSprite, "position", hitPosition, start-mainSongPosition)
-			self.add_child(testNoteSprite)
+			tw.tween_property(hitObject, "position", hitPosition, start-mainSongPosition)
+			self.add_child(hitObject)
 			currentlySpawnedNotes.append(start)
 
 func parse_hit_times(dict:Dictionary):
-	var hitObject = HitObject.new()
-	hitObject.start = dict["start"]
-	hitObject.end = dict["end"]
-	hitObject.side = dict["side"] 
-	hitObject.direction = dict["direction"]
-	return hitObject
+	var ParsedHitObject = HitObjectParser.new()
+	ParsedHitObject.start = dict["start"]
+	ParsedHitObject.end = dict["end"]
+	ParsedHitObject.side = dict["side"] 
+	return ParsedHitObject
 
 func get_position_along_radius(circleCenter:Vector2, circleRadius:float, angle:float):
 	return circleCenter + Vector2(cos(angle), sin(angle)) * circleRadius
