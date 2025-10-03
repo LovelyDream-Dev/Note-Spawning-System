@@ -12,6 +12,9 @@ class_name NoteSpawner
 
 @export var radiusInPixels:float = 500.0
 
+
+## The speed at which notes scroll
+@export_range(0.8, 2.8, 0.1) var scrollSpeed:float = 1.0
 ## The side that notes begin spawning from. [br][br] [code]-1[/code]: Notes spawn from the left. [br][br] [code]1[/code]: Notes spawn from the right. 
 @export_range(-1.0,1.0,2.0) var spawnSide:float = -1.0
 ## The direction, clockwise or counter-clockwise, that notes spawn in. [br][br][code]-1[/code]: Notes spawn counter-clockwise. br][br][code]1[/code]: Notes spawn clockwise.
@@ -50,6 +53,7 @@ func _input(_event: InputEvent) -> void:
 			$TestSong.play()
 
 func _process(_delta: float) -> void:
+	print(bpm)
 	if secondsPerBeat != 60/bpm: secondsPerBeat = 60/bpm
 	if $TestSong.playing:
 		mainSongPosition = $TestSong.get_playback_position()
@@ -65,7 +69,9 @@ func spawn_notes():
 		if abs(mainSongPosition - start) < spawnWindowInSeconds and start not in currentlySpawnedNotes:
 			var beatPosition = start/secondsPerBeat
 			var angle = fmod(beatPosition, beatsPerRotation) * (TAU/beatsPerRotation)
-			var spawnPosition = get_position_along_radius(Vector2(0,0), spawnSide * radiusInPixels * 2, spawnDirection * angle)
+			## This variable determines what side the notes spawn from, and the scroll speed.
+			var spawnDistanceFromCenter = spawnSide * radiusInPixels * 2 * scrollSpeed
+			var spawnPosition = get_position_along_radius(Vector2(0,0), spawnDistanceFromCenter, spawnDirection * angle)
 			var hitPosition = get_position_along_radius(Vector2(0,0), spawnSide * radiusInPixels, spawnDirection * angle)
 
 			var hitObject:HitObject = HitObject.new()
@@ -75,7 +81,6 @@ func spawn_notes():
 			hitObject.start = start
 			hitObject.end = hitObject.end
 			hitObject.side = side
-			
 
 			var tw = create_tween().set_ease(Tween.EASE_OUT_IN).set_trans(Tween.TRANS_LINEAR).parallel()
 			tw.tween_property(hitObject, "position", hitPosition, start-mainSongPosition)
