@@ -75,7 +75,8 @@ func spawn_notes():
 			var hitPosition = get_position_along_radius(Vector2(0,0), spawnSide * radiusInPixels, spawnDirection * angle)
 
 			var hitObject:HitObject = HitObject.new()
-			hitObject.hitNoteTexture = load("res://Default Images/Hit-Note.png")
+			hitObject.hitNoteTexture = load("res://Default Skin/hit-note.png")
+			hitObject.hitNoteOutlineTexture = load("res://Default Skin/hit-note-outline.png")
 			hitObject.position = spawnPosition
 			hitObject.center = self.position
 			hitObject.start = start

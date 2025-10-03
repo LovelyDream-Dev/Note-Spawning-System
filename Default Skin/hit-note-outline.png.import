@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ho65bsvuos52"
-path="res://.godot/imported/Hit-Note.png-b146b3e0310956865d74493169c8c810.ctex"
+uid="uid://cbfa7jpl3a6n4"
+path="res://.godot/imported/hit-note-outline.png-db23311459c40018458f8870d2271907.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Default Images/Hit-Note.png"
-dest_files=["res://.godot/imported/Hit-Note.png-b146b3e0310956865d74493169c8c810.ctex"]
+source_file="res://Default Skin/hit-note-outline.png"
+dest_files=["res://.godot/imported/hit-note-outline.png-db23311459c40018458f8870d2271907.ctex"]
 
 [params]
 

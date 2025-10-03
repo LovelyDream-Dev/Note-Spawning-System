@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbqfwrpptgqua"
-path="res://.godot/imported/Slider-Arrow.png-e8ed32b5cb8d4dfa2a31f6e9396a1ac8.ctex"
+uid="uid://cjerd5w4vy4eh"
+path="res://.godot/imported/slider-body.png-3d91c23a4c39de675a5cfcc191e6463d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Default Images/Slider-Arrow.png"
-dest_files=["res://.godot/imported/Slider-Arrow.png-e8ed32b5cb8d4dfa2a31f6e9396a1ac8.ctex"]
+source_file="res://Default Skin/slider-body.png"
+dest_files=["res://.godot/imported/slider-body.png-3d91c23a4c39de675a5cfcc191e6463d.ctex"]
 
 [params]
 
