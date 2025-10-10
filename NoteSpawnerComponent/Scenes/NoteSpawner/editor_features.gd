@@ -31,20 +31,19 @@ func _ready() -> void:
 
 func _input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed(parent.lmbActionName):
-		var s = Sprite2D.new()
-		s.texture = load("res://icon.svg")
-		s.position = currentCirclePositionFromBeat
-		self.add_child(s)
+		pass
 
 func _process(_delta: float) -> void:
 	if !parent.inEditor:
 		self.hide()
 		return
+
+	queue_redraw()
 	if !self.visible: self.show()
+	mousePos = get_global_mouse_position()
 	notePlacementSide = parent.notePlacementSide
 	editorSnapDivisor = parent.editorSnapDivisor
 	notePlacementDirection = parent.notePlacementDirection
-	mousePos = get_global_mouse_position()
 	circleColor = parent.circleColor
 	radiusInPixels = parent.radiusInPixels
 	minMouseDistance = parent.minMouseDistance
@@ -81,4 +80,9 @@ func get_circle_position_from_beat(center:Vector2, beat:float):
 	var posx = center.x + radiusInPixels * cos(angle)
 	var posy = center.y + radiusInPixels * sin(angle)
 	currentCirclePositionFromBeat = Vector2(posx, posy)
-	
+
+func place_note():
+	var sprite = Sprite2D.new()
+	sprite.texture = load("res://Default Skin/hit-note.png")
+	sprite.position = currentCirclePositionFromBeat
+	self.add_child(sprite)

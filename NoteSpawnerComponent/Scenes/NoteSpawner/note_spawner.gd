@@ -27,19 +27,17 @@ class_name NoteSpawner
 @export var lmbActionName:StringName 
 
 @onready var editorFeatures:EditorFeatures = $EditorFeatures
+@onready var noteContainer:Node2D = $NoteContainer
 
 var editorSnapDivisor:int = 2
 # TEMPORARY VALUE: The bpm of my test song
 var bpm:float = 163.0 
 var secondsPerBeat:float
+var beatsPerSecond:float
 var mainSongPosition:float
 
 var testHitTimes:Array = [
-	{"start":1.48, "end":1.0, "side":-1.0},
-	{"start":1.85, "end":1.0, "side":-1.0},
-	{"start":2.22, "end":1.0, "side":-1.0},
-	{"start":2.59, "end":1.0, "side":-1.0},
-	{"start":2.96, "end":1.0, "side":-1.0}
+	{"startTime":1.0, "endTime":1.0, "side":-1.0},
 	]
 
 var currentlySpawnedNotes:Array = []
@@ -53,7 +51,7 @@ func _input(_event: InputEvent) -> void:
 			$TestSong.play()
 
 func _process(_delta: float) -> void:
-	print(bpm)
+	if beatsPerSecond != bpm/60: beatsPerSecond = bpm/60
 	if secondsPerBeat != 60/bpm: secondsPerBeat = 60/bpm
 	if $TestSong.playing:
 		mainSongPosition = $TestSong.get_playback_position()
@@ -63,35 +61,52 @@ func _process(_delta: float) -> void:
 
 func spawn_notes():
 	for dict in testHitTimes:
-		var start:float = parse_hit_times(dict).start
-		var end:float = parse_hit_times(dict).end
+		var startTime:float = parse_hit_times(dict).start
+		var endTime:float = parse_hit_times(dict).end
 		var side:int = parse_hit_times(dict).side
-		if abs(mainSongPosition - start) < spawnWindowInSeconds and start not in currentlySpawnedNotes:
-			var beatPosition = start/secondsPerBeat
-			var angle = fmod(beatPosition, beatsPerRotation) * (TAU/beatsPerRotation)
+	
+		# Check if the note hit time is within the spawn window and if the note is not already spawned
+		if abs(mainSongPosition - startTime) < spawnWindowInSeconds and startTime not in currentlySpawnedNotes:
+			# Calculate values needed for note spawning and set the values within the note
+			var hitBeatPosition = startTime * beatsPerSecond
+			var hitAngle = fmod(hitBeatPosition, beatsPerRotation) * (TAU/beatsPerRotation)
 			## This variable determines what side the notes spawn from, and the scroll speed.
 			var spawnDistanceFromCenter = spawnSide * radiusInPixels * 2 * scrollSpeed
-			var spawnPosition = get_position_along_radius(Vector2(0,0), spawnDistanceFromCenter, spawnDirection * angle)
-			var hitPosition = get_position_along_radius(Vector2(0,0), spawnSide * radiusInPixels, spawnDirection * angle)
-
+			var spawnPosition = get_position_along_radius(Vector2(0,0), spawnDistanceFromCenter, spawnDirection * hitAngle)
+			var hitPosition = get_position_along_radius(Vector2(0,0), spawnSide * radiusInPixels, spawnDirection * hitAngle)
 			var hitObject:HitObject = HitObject.new()
 			hitObject.hitNoteTexture = load("res://Default Skin/hit-note.png")
 			hitObject.hitNoteOutlineTexture = load("res://Default Skin/hit-note-outline.png")
-			hitObject.position = spawnPosition
 			hitObject.center = self.position
-			hitObject.start = start
-			hitObject.end = hitObject.end
+			hitObject.hitAngle = hitAngle
 			hitObject.side = side
+			# Spawn and animate a hit note
+			if endTime <= startTime:
+				hitObject.position = spawnPosition
+				var tw = create_tween().set_ease(Tween.EASE_OUT_IN).set_trans(Tween.TRANS_LINEAR).parallel()
+				tw.tween_property(hitObject as HitObject, "position", hitPosition, startTime-mainSongPosition)
+				noteContainer.add_child(hitObject)
+				currentlySpawnedNotes.append(startTime)
+			# Spawn and animate a slider note
+			# TODO Need to fix slider implementation
+			else:
+				var releaseBeatPosition = endTime * beatsPerSecond
+				var releaseAngle = fmod(releaseBeatPosition, beatsPerRotation) * (TAU/beatsPerRotation)
+				hitObject.position = get_position_along_radius(Vector2(0,0), spawnSide * radiusInPixels, spawnDirection * releaseAngle)
+				hitObject.releaseAngle = releaseAngle
+				hitObject.sliderDuration = endTime - startTime
+				noteContainer.add_child(hitObject)
+				currentlySpawnedNotes.append(startTime)
+				#var tw = create_tween().set_ease(Tween.EASE_OUT_IN).set_trans(Tween.TRANS_LINEAR).parallel()
+				
 
-			var tw = create_tween().set_ease(Tween.EASE_OUT_IN).set_trans(Tween.TRANS_LINEAR).parallel()
-			tw.tween_property(hitObject, "position", hitPosition, start-mainSongPosition)
-			self.add_child(hitObject)
-			currentlySpawnedNotes.append(start)
+func get_beat_from_song_position(songPosition:float) -> float:
+	return songPosition * beatsPerSecond
 
 func parse_hit_times(dict:Dictionary):
 	var ParsedHitObject = HitObjectParser.new()
-	ParsedHitObject.start = dict["start"]
-	ParsedHitObject.end = dict["end"]
+	ParsedHitObject.start = dict["startTime"]
+	ParsedHitObject.end = dict["endTime"]
 	ParsedHitObject.side = dict["side"] 
 	return ParsedHitObject
 
