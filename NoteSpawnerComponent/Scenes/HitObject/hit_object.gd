@@ -1,24 +1,24 @@
 extends Node2D
 class_name HitObject
 
-@onready var sliderSpawnTimer:Timer = Timer.new()
-
 var noteContainerParent:Node2D
 
 var hitNoteTexture:Texture = null
 var hitNoteOutlineTexture:Texture = null
 
-var hitAngle:float
-var releaseAngle:float
+## The ID of the hold note. If [member endBeat] is greater than [member startBeat], the note becomes a hold note.
+var holdNoteID:int
+
+## The time that the note is meant to be hit on. If it is less than [member endBeat], the note will be a hold note.
+var startTime:float
+
+## The time that the note is meant to be released on. If it is greater than [member startBeat], the note will be a hold note.
+var endTime:float
+
+## The side that the note is meant to be hit by. [br][code]-1[/code]: The note is hit by the left side. [br][code]1[/code]: The note is hit by the right side.
 var side:int
 
-## TODO Unused slider variables, fix slider implementation
-## If the note is a slider, [member sliderProgress] is far along the slider is from 0.0 to 1.0.
-var sliderProgress:float
-var sliderDuration:float
-var sliderSpawnDuration:float
-var sliderSpawnProgress:float
-
+## The center that the note will move towards and look at.
 var center:Vector2
 
 func _enter_tree() -> void:
@@ -35,22 +35,5 @@ func _enter_tree() -> void:
 	self.add_child(hitNote)
 	self.look_at(center)
 
-func _ready() -> void:
-	#self.add_child(sliderSpawnTimer)
-	#sliderSpawnTimer.one_shot = true
-	#sliderSpawnTimer.start(sliderSpawnDuration)
+func set_hold_note():
 	pass
-
-func _process(_delta: float) -> void:
-	#sliderSpawnProgress = min(sliderSpawnTimer.time_left / sliderSpawnDuration, 1.0)
-	#queue_redraw()
-	pass
-
-func _draw() -> void:
-	pass
-	#if sliderDuration > 0:
-		#draw_slider()
-
-func draw_slider():
-	draw_circle(noteContainerParent.position, noteContainerParent.radiusInPixels, Color.GREEN, false)
-	draw_arc(noteContainerParent.position, noteContainerParent.radiusInPixels, hitAngle, releaseAngle * sliderSpawnProgress, 100, Color.WHITE, 10, true)
